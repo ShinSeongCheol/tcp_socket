@@ -1,35 +1,38 @@
-package client;
+package server;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class Main {
-
+	
 	public static void main(String[] args) {
-
+		// TODO Auto-generated method stub
 		try {
-			//소켓 아이피 주소가 localhost이고 포트가 35248로 열린 서버에 접속
-			Socket socket = new Socket("localhost", 35248);
-			
-			//송신 쓰레드 객체 생성
-			Client_Send_Thread cst = new Client_Send_Thread();
-			//Client_Send_Thread 객체 메서드 setSocket에 socket번호를 넘겨줌
-			cst.setSocket(socket);
-			
-			//수신 쓰레드 객체 생성
-			Client_Recive_Thread crt = new Client_Recive_Thread();
-			//Client_Recive_Thread에 소켓 번호를 넘겨줌
-			crt.setSocket(socket);
 
-			//송수신 쓰레드 시작
-			cst.start();
-			crt.start();
-			
-			//호스트를 알수없을때 에러 발생
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			//입출력 에러가 나면 에러 발생
+			// 서버소켓 포트번호가 35248인 서버소켓을 s생성
+			ServerSocket serversocket = new ServerSocket(35248);
+			System.out.println("서버 연결 대기중..");
+			while(true) {
+				Socket socket = new Socket();
+
+				// 서버소켓에 들어온 소켓번호를 소켓에다가 저장
+				socket = serversocket.accept();
+				System.out.println(socket.getPort()+"서버 연결 성공");
+
+				// 수신받는 쓰레드 객체를 생성
+				Server_Recive_Thread srt = new Server_Recive_Thread();
+				srt.setSocket(socket);
+
+				// 송신하는 쓰레드 객체를 생성
+				Server_Send_Thread sst = new Server_Send_Thread();
+				sst.setSocket(socket);
+				
+				// 송수신쓰레드를 시작
+				srt.start();
+				sst.start();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
